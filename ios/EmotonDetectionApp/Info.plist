@@ -5,7 +5,9 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>NSCameraUsageDescription</key>
-	<string>We need access to your camera to detect emotions.</string>
+	<string>$(PRODUCT_NAME) needs access to your Camera.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>$(PRODUCT_NAME) needs access to your microphone to record videos.</string>
 	<key>CFBundleDisplayName</key>
 	<string>EmotonDetectionApp</string>
 	<key>CFBundleExecutable</key>

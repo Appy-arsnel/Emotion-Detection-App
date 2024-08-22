@@ -1,118 +1,110 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import React from 'react';
-import type {PropsWithChildren} from 'react';
 import {
   SafeAreaView,
-  ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
-  useColorScheme,
+  Image,
+  TouchableOpacity,
   View,
-} from 'react-native';
-
+} from "react-native";
+import React from "react";
 import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+  Camera,
+  useCameraDevice,
+  useCameraPermission,
+} from "react-native-vision-camera";
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+const PermissionsPage = () => {
+  const { requestPermission } = useCameraPermission();
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+  React.useEffect(() => {
+    requestPermission();
+  }, [requestPermission]);
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
-
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
+    <SafeAreaView>
+      <Text>Permissions is required.</Text>
     </SafeAreaView>
   );
+};
+
+const NoCameraDeviceError = () => {
+  return (
+    <View>
+      <Text>No camera device found.</Text>
+    </View>
+  );
+};
+
+function App() {
+  const device = useCameraDevice("back");
+  const { hasPermission } = useCameraPermission();
+  const cameraRef: any = React.useRef(null);
+  const [photo, setPhoto] = React.useState(null);
+
+  console.log(photo);
+
+  const takePhoto = async () => {
+    if (cameraRef.current) {
+      const options = { quality: 0.8, flashMode: "on" };
+      const capturedPhoto = await cameraRef.current.takePhoto(options);
+      setPhoto(capturedPhoto.path);
+    }
+  };
+
+  if (!hasPermission) return <PermissionsPage />;
+  if (device == null) return <NoCameraDeviceError />;
+
+  return (
+    <>
+      {photo ? (
+        <>
+          <Image
+            style={{ flex: 1 }}
+            source={{
+              uri: `file://'${photo}`,
+            }}
+          />
+          <TouchableOpacity
+            onPress={() => setPhoto(null)}
+            style={{
+              borderColor: "black",
+              borderWidth: 2,
+              justifyContent: "center",
+              alignItems: "center",
+              padding: 10,
+            }}
+          >
+            <Text>Back</Text>
+          </TouchableOpacity>
+        </>
+      ) : (
+        <View style={StyleSheet.absoluteFill}>
+          <Camera
+            style={StyleSheet.absoluteFill}
+            device={device}
+            isActive={true}
+            photo={true}
+            ref={cameraRef}
+          />
+          <TouchableOpacity
+            onPress={takePhoto}
+            style={{
+              position: "absolute",
+              bottom: 10,
+              alignSelf: "center",
+              backgroundColor: "white",
+              height: 50,
+              width: 50,
+              borderRadius: 25,
+              borderColor: "black",
+              borderWidth: 2,
+              justifyContent: "center",
+            }}
+          />
+        </View>
+      )}
+    </>
+  );
 }
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
-
 export default App;
+
+const styles = StyleSheet.create({});
